@@ -5,8 +5,6 @@ Fork of [mujocolab/mjlab](https://github.com/mujocolab/mjlab), scaffolded for th
 Wisconsin–Madison by [WiscoHumanoids](https://www.linkedin.com/company/wiscohumanoids).
 
 <p align="center">
-  <img src="docs/static/wisco_humanoid_cad.png" alt="Wisco Humanoid CAD" height="400"/>
-  &nbsp;&nbsp;&nbsp;&nbsp;
   <img src="docs/static/wisco_humanoid.jpg" alt="Wisco Humanoid" height="400"/>
 </p>
 
@@ -21,9 +19,7 @@ Wisconsin–Madison by [WiscoHumanoids](https://www.linkedin.com/company/wiscohu
 
 **Sim2Sim in MuJoCo** — velocity tracking with an exported ONNX policy:
 
-<p align="center">
-  <img src="docs/static/wisco_humanoid_sim2sim.gif" alt="Wisco Humanoid Sim2Sim" width="600"/>
-</p>
+_Recording to be added once a policy is trained._
 
 To record one yourself:
 
