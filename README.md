@@ -4,9 +4,10 @@ Fork of [mujocolab/mjlab](https://github.com/mujocolab/mjlab), scaffolded for th
 **Wisco Humanoid**: a humanoid being built from the ground up at the University of
 Wisconsin–Madison by [WiscoHumanoids](https://www.linkedin.com/company/wiscohumanoids).
 
-The robot package, task structure, gait-clock and imitation terms, and the original
-sim2sim workflow are adapted from [asimov-mjlab](https://github.com/menloresearch/asimov-mjlab)
-by [Menlo Research](https://menlo.ai).
+Inspired by [asimov-mjlab](https://github.com/menloresearch/asimov-mjlab) by
+[Menlo Research](https://menlo.ai) — their Asimov fork is the reference this scaffold
+follows, from the robot package layout and gait-clock and imitation terms to the
+original sim2sim workflow.
 
 <p align="center">
   <img src="docs/static/wiscohumanoids_logo.jpg" alt="Wisco Humanoids" height="180"/>
@@ -187,10 +188,10 @@ SCAFFOLD.md                                     # orientation + known shortcuts
   — the simulation and RL framework this repository forks. The manager API, task
   registry, MDP terms and ONNX export all come from there.
 - **[asimov-mjlab](https://github.com/menloresearch/asimov-mjlab)** by
-  [Menlo Research](https://menlo.ai) — the Asimov robot package, velocity task configs,
+  [Menlo Research](https://menlo.ai) — the inspiration for this scaffold and its
+  reference implementation: the Asimov robot package, velocity task configs,
   reflected-inertia and PD-gain approach, the gait clock / alternating-feet / imitation
-  rewards, and the original `deploy.py` that `sim2sim` is based on. This scaffold is a
-  generalized port of that work.
+  rewards, and the original `deploy.py` that `sim2sim` is based on.
 - **[WiscoHumanoids](https://www.linkedin.com/company/wiscohumanoids)** — the robot this
   scaffold is being adapted for.
 
