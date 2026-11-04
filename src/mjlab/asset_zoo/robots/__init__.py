@@ -16,3 +16,12 @@ from mjlab.asset_zoo.robots.unitree_go1.go1_constants import (
 from mjlab.asset_zoo.robots.unitree_go1.go1_constants import (
   get_go1_robot_cfg as get_go1_robot_cfg,
 )
+from mjlab.asset_zoo.robots.wisco_humanoid.wisco_humanoid_constants import (
+  WISCO_HUMANOID_ACTION_SCALE as WISCO_HUMANOID_ACTION_SCALE,
+)
+from mjlab.asset_zoo.robots.wisco_humanoid.wisco_humanoid_constants import (
+  WISCO_HUMANOID_WALKING_REFERENCE as WISCO_HUMANOID_WALKING_REFERENCE,
+)
+from mjlab.asset_zoo.robots.wisco_humanoid.wisco_humanoid_constants import (
+  get_wisco_humanoid_robot_cfg as get_wisco_humanoid_robot_cfg,
+)

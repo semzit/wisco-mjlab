@@ -63,6 +63,7 @@ demo = "mjlab.scripts.demo:main"
 list-envs = "mjlab.scripts.list_envs:main"
 viz-nan = "mjlab.scripts.nan_viz:main"
 export-scene = "mjlab.scripts.export_scene:main"
+sim2sim = "mjlab.scripts.sim2sim:main"
 
 [dependency-groups]
 dev = [
@@ -94,6 +95,12 @@ docs = [
 cu130 = ["torch>=2.14.0"]
 cu126 = ["torch>=2.14.0"]
 cpu = ["torch>=2.14.0"]
+sim2sim = [
+  "onnx>=1.16",
+  "onnxruntime>=1.19",
+  "opencv-python>=4.10",
+  "matplotlib>=3.9",
+]
 
 [tool.uv]
 conflicts = [

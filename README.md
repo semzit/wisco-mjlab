@@ -83,6 +83,33 @@ uv run play Mjlab-Your-Task-Id --agent random  # Sends uniform random actions
 
 When running motion-tracking tasks, add `--registry-name your-org/motions/motion-name` to the command.
 
+## Adding a New Robot (Wisco Humanoid scaffold)
+
+New to the project? [SCAFFOLD.md](SCAFFOLD.md) explains what mjlab is, what the Asimov
+fork added, and what this scaffold changes.
+
+This fork carries a scaffold for a humanoid whose model is not defined yet:
+
+- `src/mjlab/asset_zoo/robots/wisco_humanoid/` — robot constants, empty `xmls/` and
+  `assets/meshes/`, and a checklist in its `README.md`.
+- `src/mjlab/tasks/velocity/config/wisco_humanoid/` — rough, flat and balance tasks:
+  `Mjlab-Velocity-Rough-Wisco-Humanoid`, `Mjlab-Velocity-Flat-Wisco-Humanoid` and
+  `Mjlab-Balance-Wisco-Humanoid`.
+
+Everything hardware-specific lives in `wisco_humanoid_constants.py`; the task configs
+only reference names, so a new robot is mainly a matter of supplying the MJCF plus
+motor data. Tasks register even before the model exists, so `uv run list-envs` works
+out of the box.
+
+Sim2sim deployment of an exported ONNX policy:
+
+```bash
+uv sync --extra sim2sim
+uv run sim2sim --policy path/to/policy.onnx --cmd_vx 0.5
+```
+
+The script reads the observation layout and the PD gains from the ONNX metadata, so it
+does not need to be edited when the robot's degrees of freedom change.
 
 ## Documentation
 
