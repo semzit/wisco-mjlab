@@ -29,10 +29,10 @@ Typical workflow: `uv run train <TASK>` → checkpoints in Weights & Biases → 
 
 ---
 
-## 2. The Asimov fork
+## 2. The Asimov fork (Menlo Research)
 
-[`menloresearch/asimov-mjlab`](https://github.com/menloresearch/asimov-mjlab) is a fork of
-mjlab for the **Asimov** robot: a 12-DOF biped, six joints per leg (hip pitch/roll/yaw,
+[`menloresearch/asimov-mjlab`](https://github.com/menloresearch/asimov-mjlab) from
+[Menlo Research](https://menlo.ai) is a fork of mjlab for the **Asimov** robot: a 12-DOF biped, six joints per leg (hip pitch/roll/yaw,
 knee, ankle pitch/roll), with a canted hip-pitch axis, a narrow 11 cm stance and limited
 ankle range.
 
