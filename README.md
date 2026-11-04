@@ -1,168 +1,188 @@
-![Project banner](https://raw.githubusercontent.com/mujocolab/mjlab/main/docs/source/_static/mjlab-banner.jpg)
+# Wisco Humanoid Locomotion
 
-# mjlab
+Fork of [mujocolab/mjlab](https://github.com/mujocolab/mjlab), scaffolded for the
+**Wisco Humanoid**: a humanoid being built from the ground up at the University of
+Wisconsin–Madison by [WiscoHumanoids](https://www.linkedin.com/company/wiscohumanoids).
 
-[![GitHub Actions](https://img.shields.io/github/actions/workflow/status/mujocolab/mjlab/ci.yml?branch=main)](https://github.com/mujocolab/mjlab/actions/workflows/ci.yml?query=branch%3Amain)
-[![Documentation](https://github.com/mujocolab/mjlab/actions/workflows/docs.yml/badge.svg)](https://mujocolab.github.io/mjlab/)
-[![License](https://img.shields.io/github/license/mujocolab/mjlab)](https://github.com/mujocolab/mjlab/blob/main/LICENSE)
-[![MuJoCo Warp](https://img.shields.io/badge/MuJoCo_Warp-3.16.0-blue)](https://github.com/google-deepmind/mujoco_warp/releases/tag/v3.16.0)
-[![Nightly Benchmarks](https://img.shields.io/badge/Nightly-Benchmarks-blue)](https://mujocolab.github.io/mjlab/nightly/)
-[![PyPI](https://img.shields.io/pypi/v/mjlab)](https://pypi.org/project/mjlab/)
-[![PyPI downloads](https://img.shields.io/pypi/dm/mjlab?color=blue)](https://pypistats.org/packages/mjlab)
+<p align="center">
+  <img src="docs/static/wisco_humanoid_cad.png" alt="Wisco Humanoid CAD" height="400"/>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="docs/static/wisco_humanoid.jpg" alt="Wisco Humanoid" height="400"/>
+</p>
 
-mjlab combines [Isaac Lab](https://github.com/isaac-sim/IsaacLab)'s manager-based API with [MuJoCo Warp](https://github.com/google-deepmind/mujoco_warp), a GPU-accelerated version of [MuJoCo](https://github.com/google-deepmind/mujoco).
-The framework provides composable building blocks for environment design,
-with minimal dependencies and direct access to native MuJoCo data structures.
+> ⚠️ **Scaffold, not a working robot yet.** The task structure, gains and tooling are in
+> place, but `xmls/wisco_humanoid.xml` and the meshes do not exist. Every hardware number
+> is a placeholder marked `TODO(wisco-humanoid)`. See [SCAFFOLD.md](SCAFFOLD.md) for what
+> changed and what is still fake.
 
-## Getting Started
+---
 
-mjlab requires an NVIDIA GPU for training. macOS is supported for evaluation only.
+## Demo
 
-**Try it now:**
+**Sim2Sim in MuJoCo** — velocity tracking with an exported ONNX policy:
 
-Run the demo (no installation needed):
+<p align="center">
+  <img src="docs/static/wisco_humanoid_sim2sim.gif" alt="Wisco Humanoid Sim2Sim" width="600"/>
+</p>
 
-```bash
-uvx --from mjlab --refresh demo
-```
-
-Or try in [Google Colab](https://colab.research.google.com/github/mujocolab/mjlab/blob/main/notebooks/demo.ipynb) (no local setup required).
-
-**Install from source:**
-
-```bash
-git clone https://github.com/mujocolab/mjlab.git && cd mjlab
-uv run demo
-```
-
-For alternative installation methods (PyPI, Docker), see the [Installation Guide](https://mujocolab.github.io/mjlab/main/source/installation.html).
-
-## Training Examples
-
-### 1. Velocity Tracking
-
-Train a Unitree G1 humanoid to follow velocity commands on flat terrain:
-
-```bash
-uv run train Mjlab-Velocity-Flat-Unitree-G1 --env.scene.num-envs 4096
-```
-
-**Multi-GPU Training:** Scale to multiple GPUs using `--gpu-ids`:
-
-```bash
-uv run train Mjlab-Velocity-Flat-Unitree-G1 \
-  --gpu-ids "[0, 1]" \
-  --env.scene.num-envs 4096
-```
-
-See the [Distributed Training guide](https://mujocolab.github.io/mjlab/main/source/training/distributed_training.html) for details.
-
-Evaluate a policy while training (fetches latest checkpoint from Weights & Biases):
-
-```bash
-uv run play Mjlab-Velocity-Flat-Unitree-G1 --wandb-run-path your-org/mjlab/run-id
-```
-
-### 2. Motion Imitation
-
-Train a humanoid to mimic reference motions. See the [motion imitation guide](https://mujocolab.github.io/mjlab/main/source/training/motion_imitation.html) for preprocessing setup.
-
-```bash
-uv run train Mjlab-Tracking-Flat-Unitree-G1 --registry-name your-org/motions/motion-name --env.scene.num-envs 4096
-uv run play Mjlab-Tracking-Flat-Unitree-G1 --wandb-run-path your-org/mjlab/run-id
-```
-
-### 3. Sanity-check with Dummy Agents
-
-Use built-in agents to sanity check your MDP before training:
-
-```bash
-uv run play Mjlab-Your-Task-Id --agent zero  # Sends zero actions
-uv run play Mjlab-Your-Task-Id --agent random  # Sends uniform random actions
-```
-
-When running motion-tracking tasks, add `--registry-name your-org/motions/motion-name` to the command.
-
-## Adding a New Robot (Wisco Humanoid scaffold)
-
-New to the project? [SCAFFOLD.md](SCAFFOLD.md) explains what mjlab is, what the Asimov
-fork added, and what this scaffold changes.
-
-This fork carries a scaffold for a humanoid whose model is not defined yet:
-
-- `src/mjlab/asset_zoo/robots/wisco_humanoid/` — robot constants, empty `xmls/` and
-  `assets/meshes/`, and a checklist in its `README.md`.
-- `src/mjlab/tasks/velocity/config/wisco_humanoid/` — rough, flat and balance tasks:
-  `Mjlab-Velocity-Rough-Wisco-Humanoid`, `Mjlab-Velocity-Flat-Wisco-Humanoid` and
-  `Mjlab-Balance-Wisco-Humanoid`.
-
-Everything hardware-specific lives in `wisco_humanoid_constants.py`; the task configs
-only reference names, so a new robot is mainly a matter of supplying the MJCF plus
-motor data. Tasks register even before the model exists, so `uv run list-envs` works
-out of the box.
-
-Sim2sim deployment of an exported ONNX policy:
+To record one yourself:
 
 ```bash
 uv sync --extra sim2sim
 uv run sim2sim --policy path/to/policy.onnx --cmd_vx 0.5
 ```
 
-The script reads the observation layout and the PD gains from the ONNX metadata, so it
-does not need to be edited when the robot's degrees of freedom change.
+---
 
-## Documentation
+## Robot Modeling
 
-Full documentation is available at **[mujocolab.github.io/mjlab](https://mujocolab.github.io/mjlab/)**.
+**12-DOF bipedal** (placeholder: 6 joints per leg) — `hip_pitch`, `hip_roll`, `hip_yaw`,
+`knee`, `ankle_pitch`, `ankle_roll`.
 
-## Development
+Joint families are defined in
+[`wisco_humanoid_constants.py`](src/mjlab/asset_zoo/robots/wisco_humanoid/wisco_humanoid_constants.py)
+and matched by regex, so a robot with a different joint layout only needs edits to that
+file and the name constants in
+[`env_cfgs.py`](src/mjlab/tasks/velocity/config/wisco_humanoid/env_cfgs.py).
+
+Key characteristics (TBD, to be measured on the real machine):
+
+- **Stance width** — affects the lateral velocity limits.
+- **Hip axis** — a canted pitch axis couples roll and pitch and needs looser pose tolerances.
+- **Ankle range** — the tightest joint in the pose reward.
+- **Mass and height** — used to set the standing keyframe and command ranges.
+
+---
+
+## Training
+
+### Reward structure
+
+| Reward | Description |
+|--------|-------------|
+| **Velocity tracking** | Track the commanded `(vx, vy, ωz)` |
+| **Imitation** | Match a cyclic reference trajectory (optional, enabled when a reference CSV exists) |
+| **Alternating feet** | Enforce a bipedal gait pattern |
+| **Pose** | Speed-dependent joint posture (tighter when standing, looser when running) |
+| **Air time** | Encourage dynamic stepping |
+| **Foot clearance / swing height** | Lift the foot over terrain and land cleanly |
+| **Foot slip** | Penalize sliding while in contact |
+| **Soft landing** | Penalize hard impacts |
+| **Self-collision** | Penalize inter-link contact |
+| **Upright, body ang. vel, angular momentum** | Keep the trunk stable |
+| **Joint limits, action rate** | Stay inside the actuators' envelope |
+
+Weights live in
+[`env_cfgs.py`](src/mjlab/tasks/velocity/config/wisco_humanoid/env_cfgs.py) and inherit
+mjlab's defaults where the robot does not need an override.
+
+### Configuration
+
+- PPO with adaptive learning rate, 30k iterations
+- Terrain curriculum on the rough task
+- Network: `(256, 256, 128)` — deliberately small for a 12-DOF robot
+
+### Tasks
+
+| Task ID | Terrain | Purpose |
+|---------|---------|---------|
+| `Mjlab-Velocity-Rough-Wisco-Humanoid` | generated | Full training with terrain curriculum |
+| `Mjlab-Velocity-Flat-Wisco-Humanoid` | plane | Flat-ground training and evaluation |
+| `Mjlab-Balance-Wisco-Humanoid` | plane | Standing balance with reactive stepping (no velocity command) |
+
+---
+
+## Observations (Policy)
+
+| Observation | Source |
+|-------------|--------|
+| `base_ang_vel` | IMU |
+| `projected_gravity` | IMU |
+| `joint_pos` | Relative to the default pose |
+| `joint_vel` | Joint encoders |
+| `actions` | Action history |
+| `command` | `(vx, vy, ωz)` |
+| `height_scan` | Terrain raycast (rough task only) |
+| `gait_clock` | `[cos(φ), sin(φ)]` at the configured gait frequency |
+
+**Removed:** `base_lin_vel` — a real robot needs a state estimator to observe it. Delete
+the two `del` lines in `env_cfgs.py` if the robot carries one.
+
+The critic additionally sees foot height, air time, contact state and contact forces.
+
+---
+
+## Sim2Real
+
+- **Physics-based PD gains:** `KP = J_reflected · ω²` at 10 Hz, `KD` capped at the motor
+  maximum so the policy never learns against a stiffer controller than the hardware.
+- **Armature:** `J_reflected = J_rotor · gear_ratio²`. A mismatch between the training XML
+  and the deployment XML makes a good policy fall over immediately.
+- **Default pose:** start from the zero pose that is mechanically stable, then tighten the
+  standing tolerance in the pose reward.
+- **Action scale:** `0.3 · effort_limit / KP`, so every joint uses a comparable fraction of
+  its torque budget.
+
+---
+
+## Quick Start
 
 ```bash
-make test          # Run all tests
-make test-fast     # Skip slow tests
-make format        # Format and lint
-make docs          # Build docs locally
+# Install uv if you haven't already
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Core install
+uv sync
+uv run list-envs
 ```
 
-For development setup: `uvx pre-commit install`
+Upstream mjlab documentation: <https://mujocolab.github.io/mjlab/>.
 
-## Citation
+### Train
 
-mjlab is used in published research and open-source robotics projects. See the [Research](https://mujocolab.github.io/mjlab/main/source/research.html) page for publications and projects, or share your own in [Show and Tell](https://github.com/mujocolab/mjlab/discussions/categories/show-and-tell).
-
-If you use mjlab in your research, please consider citing:
-
-```bibtex
-@misc{zakka2026mjlablightweightframeworkgpuaccelerated,
-  title={mjlab: A Lightweight Framework for GPU-Accelerated Robot Learning},
-  author={Kevin Zakka and Qiayuan Liao and Brent Yi and Louis Le Lay and Koushil Sreenath and Pieter Abbeel},
-  year={2026},
-  eprint={2601.22074},
-  archivePrefix={arXiv},
-  primaryClass={cs.RO},
-  url={https://arxiv.org/abs/2601.22074},
-}
+```bash
+uv run train Mjlab-Velocity-Flat-Wisco-Humanoid --env.scene.num-envs 4096
 ```
+
+Multi-GPU:
+
+```bash
+uv run train Mjlab-Velocity-Rough-Wisco-Humanoid --gpu-ids "[0, 1]" --env.scene.num-envs 4096
+```
+
+### Evaluate
+
+```bash
+uv run play Mjlab-Velocity-Flat-Wisco-Humanoid --wandb-run-path your-org/wisco-mjlab/run-id
+```
+
+Sanity-check the MDP before training:
+
+```bash
+uv run play Mjlab-Velocity-Flat-Wisco-Humanoid --agent zero
+uv run play Mjlab-Velocity-Flat-Wisco-Humanoid --agent random
+```
+
+> Training and play fail until the robot model exists. `list-envs` and the task registry
+> work today.
+
+---
+
+## Repository layout
+
+```
+src/mjlab/asset_zoo/robots/wisco_humanoid/     # robot constants, XML + mesh slots
+src/mjlab/tasks/velocity/config/wisco_humanoid/ # task configs + robot-local MDP terms
+src/mjlab/scripts/sim2sim.py                    # ONNX policy -> plain MuJoCo rollout
+SCAFFOLD.md                                     # orientation + known shortcuts
+```
+
+`upstream` tracks `mujocolab/mjlab`, so upstream fixes can be pulled in normally.
+
+---
 
 ## License
 
-mjlab is licensed under the [Apache License, Version 2.0](LICENSE).
+Licensed under the [Apache License, Version 2.0](LICENSE), inherited from mjlab.
 
-### Third-Party Code
-
-Some portions of mjlab are forked from external projects:
-
-- **`src/mjlab/utils/lab_api/`** — Utilities forked from [NVIDIA Isaac
-  Lab](https://github.com/isaac-sim/IsaacLab) (BSD-3-Clause license, see file
-  headers)
-
-Forked components retain their original licenses. See file headers for details.
-
-## Acknowledgments
-
-mjlab wouldn't exist without the excellent work of the Isaac Lab team, whose API
-design and abstractions mjlab builds upon.
-
-Thanks to the MuJoCo Warp team — especially Erik Frey and Taylor Howell — for
-answering our questions, giving helpful feedback, and implementing features
-based on our requests countless times.
+Based on [mjlab](https://github.com/mujocolab/mjlab) by MuJoCo Lab.
