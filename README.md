@@ -5,7 +5,7 @@ Fork of [mujocolab/mjlab](https://github.com/mujocolab/mjlab), scaffolded for th
 Wisconsin–Madison by [WiscoHumanoids](https://www.linkedin.com/company/wiscohumanoids).
 
 <p align="center">
-  <img src="docs/static/wisco_humanoid.jpg" alt="Wisco Humanoid" height="400"/>
+  <img src="docs/static/wiscohumanoids_logo.jpg" alt="Wisco Humanoids" height="180"/>
 </p>
 
 > ⚠️ **Scaffold, not a working robot yet.** The task structure, gains and tooling are in
