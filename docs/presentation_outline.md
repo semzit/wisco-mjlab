@@ -74,8 +74,8 @@ conceptual and the code is only there for backup.
   events, commands, and so on.
 - A term is a plain function for stateless work, or a **class** deriving from
   `ManagerTermBase` when it must cache setup or hold per-episode state.
-- Class terms get a `reset()` hook — that is what makes phase clocks and imitation
-  trackers possible.
+- Class terms get a `reset()` hook — that is what makes phase clocks and other
+  stateful terms possible.
 - *Wisco touch:* all three of our new terms are class-based and live in
   `tasks/velocity/mdp/gait.py`, alongside mjlab's own terms.
 
@@ -169,7 +169,7 @@ conceptual and the code is only there for backup.
 
 - `src/mjlab/asset_zoo/robots/wisco_humanoid/`.
 - `wisco_humanoid_constants.py` is the single place hardware numbers live.
-- Empty `xmls/`, `xmls/assets/`, `reference/` stubs.
+- Empty `xmls/` and `xmls/assets/` stubs.
 - Lazy `get_spec()` so tasks register before the model exists.
 
 ### 15. Actuator and gain setup
@@ -198,13 +198,13 @@ conceptual and the code is only there for backup.
 
 - Inherited mjlab weights for tracking, upright, pose and foot terms.
 - Pose standard deviations tuned per joint family.
-- Added self-collision, alternating-feet and optional imitation.
+- Added self-collision and alternating-feet.
 - Conservative velocity ranges for a narrow-stance biped.
 
 ### 19. New MDP terms (where they live)
 
-- `tasks/velocity/mdp/gait.py`: `gait_clock`, `alternating_feet_contact`,
-  `imitation_joint_pos`, exported through the task's `mdp` package.
+- `tasks/velocity/mdp/gait.py`: `gait_clock` and `alternating_feet_contact`,
+  exported through the task's `mdp` package.
 - **Why a separate module:** Asimov patched `observations.py` and `rewards.py` directly;
   one file of our own keeps the upstream term files untouched and the diff readable.
 - Generalized: foot count from the sensor, phase reset via the manager hook, CSV columns
@@ -248,7 +248,7 @@ conceptual and the code is only there for backup.
 | Entity + actuators | New robot package, joint families, gains, action scale |
 | Sensors | Feet contact, self-collision, foot-height scan, terrain frame |
 | Observations | Removed `base_lin_vel`, added `gait_clock` |
-| Rewards | Pose stds, self-collision, alternating feet, imitation |
+| Rewards | Pose stds, self-collision, alternating feet |
 | Environment config / tasks | Three task IDs, rough / flat / balance |
 | Training + export | `sim2sim` driven by ONNX metadata |
 

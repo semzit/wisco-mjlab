@@ -38,17 +38,6 @@ WISCO_HUMANOID_XML: Path = (
   / "wisco_humanoid.xml"
 )
 
-# Optional cyclic reference used by the imitation reward. The CSV must have a header
-# row and one column per actuated joint, in robot joint order.
-WISCO_HUMANOID_WALKING_REFERENCE: Path = (
-  MJLAB_SRC_PATH
-  / "asset_zoo"
-  / "robots"
-  / "wisco_humanoid"
-  / "reference"
-  / "walking_reference.csv"
-)
-
 
 def get_spec() -> mujoco.MjSpec:
   """Load the robot MJCF.

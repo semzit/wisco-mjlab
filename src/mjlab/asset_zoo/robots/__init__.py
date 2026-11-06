@@ -20,8 +20,5 @@ from mjlab.asset_zoo.robots.wisco_humanoid.wisco_humanoid_constants import (
   WISCO_HUMANOID_ACTION_SCALE as WISCO_HUMANOID_ACTION_SCALE,
 )
 from mjlab.asset_zoo.robots.wisco_humanoid.wisco_humanoid_constants import (
-  WISCO_HUMANOID_WALKING_REFERENCE as WISCO_HUMANOID_WALKING_REFERENCE,
-)
-from mjlab.asset_zoo.robots.wisco_humanoid.wisco_humanoid_constants import (
   get_wisco_humanoid_robot_cfg as get_wisco_humanoid_robot_cfg,
 )

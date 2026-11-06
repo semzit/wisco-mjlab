@@ -7,7 +7,6 @@ placeholders, not measurements.
 
 from mjlab.asset_zoo.robots import (
   WISCO_HUMANOID_ACTION_SCALE,
-  WISCO_HUMANOID_WALKING_REFERENCE,
   get_wisco_humanoid_robot_cfg,
 )
 from mjlab.envs import ManagerBasedRlEnvCfg
@@ -16,7 +15,6 @@ from mjlab.envs.mdp.actions import JointPositionActionCfg
 from mjlab.managers.event_manager import EventTermCfg
 from mjlab.managers.observation_manager import ObservationTermCfg
 from mjlab.managers.reward_manager import RewardTermCfg
-from mjlab.managers.scene_entity_config import SceneEntityCfg
 from mjlab.sensor import (
   ContactMatch,
   ContactSensorCfg,
@@ -41,8 +39,8 @@ FOOT_GEOMS = (
 )
 FOOT_BODY_PATTERN = r"^(left_ankle_roll_link|right_ankle_roll_link)$"
 
-# Gait cadence used by the phase clock, the alternating-feet reward and the imitation
-# reward. Keep them in sync, otherwise the phase cues contradict each other.
+# Gait cadence used by the phase clock and the alternating-feet reward. Keep them in
+# sync, otherwise the phase cues contradict each other.
 GAIT_FREQUENCY = 1.25  # Hz.
 
 
@@ -187,22 +185,6 @@ def wisco_humanoid_rough_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
       "gait_frequency": GAIT_FREQUENCY,
     },
   )
-
-  # Imitation reward, only enabled once a reference trajectory has been added to
-  # reference/walking_reference.csv.
-  if WISCO_HUMANOID_WALKING_REFERENCE.exists():
-    cfg.rewards["imitation"] = RewardTermCfg(
-      func=mdp.imitation_joint_pos,
-      weight=1.5,
-      params={
-        "data_path": str(WISCO_HUMANOID_WALKING_REFERENCE),
-        "gait_frequency": GAIT_FREQUENCY,
-        "std": 0.5,
-        "command_name": "twist",
-        "command_threshold": 0.1,
-        "asset_cfg": SceneEntityCfg("robot", joint_names=(".*",)),
-      },
-    )
 
   # Apply play mode overrides.
   if play:

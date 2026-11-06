@@ -6,7 +6,7 @@ Wisconsin–Madison by [WiscoHumanoids](https://www.linkedin.com/company/wiscohu
 
 Inspired by [asimov-mjlab](https://github.com/menloresearch/asimov-mjlab) by
 [Menlo Research](https://menlo.ai) — their Asimov fork is the reference this scaffold
-follows, from the robot package layout and gait-clock and imitation terms to the
+follows, from the robot package layout and gait-clock terms to the
 original sim2sim workflow.
 
 <p align="center">
@@ -62,7 +62,6 @@ Key characteristics (TBD, to be measured on the real machine):
 | Reward | Description |
 |--------|-------------|
 | **Velocity tracking** | Track the commanded `(vx, vy, ωz)` |
-| **Imitation** | Match a cyclic reference trajectory (optional, enabled when a reference CSV exists) |
 | **Alternating feet** | Enforce a bipedal gait pattern |
 | **Pose** | Speed-dependent joint posture (tighter when standing, looser when running) |
 | **Air time** | Encourage dynamic stepping |
@@ -174,7 +173,7 @@ uv run play Mjlab-Velocity-Flat-Wisco-Humanoid --agent random
 ```
 src/mjlab/asset_zoo/robots/wisco_humanoid/     # robot constants, XML + mesh slots
 src/mjlab/tasks/velocity/config/wisco_humanoid/ # task configs
-src/mjlab/tasks/velocity/mdp/gait.py           # gait clock, alternating feet, imitation
+src/mjlab/tasks/velocity/mdp/gait.py           # gait clock, alternating feet
 src/mjlab/scripts/sim2sim.py                    # ONNX policy -> plain MuJoCo rollout
 SCAFFOLD.md                                     # orientation + known shortcuts
 ```
