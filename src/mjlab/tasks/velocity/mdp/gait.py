@@ -4,6 +4,12 @@ Holds the phase clock observation and the alternating-feet reward used by the Wi
 Humanoid tasks. They live in ``mjlab.tasks.velocity.mdp`` so any velocity task can enable
 them through its env config; the robot config only decides whether to use them and how to
 parameterize them.
+
+Both terms are ported from the Asimov fork of mjlab by Menlo Research
+(https://github.com/menloresearch/asimov-mjlab), where the gait clock follows Booster's
+sin/cos phase convention. Local changes: phase reset goes through the manager ``reset()``
+hook instead of reading the termination buffer, the foot count is taken from the contact
+sensor, and the frequency and command threshold are parameters rather than constants.
 """
 
 from __future__ import annotations
