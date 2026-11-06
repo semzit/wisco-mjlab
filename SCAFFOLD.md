@@ -68,7 +68,7 @@ What changed relative to Asimov:
 | --- | --- |
 | `asimov` package and task IDs | `wisco_humanoid` package, `Mjlab-*-Wisco-Humanoid` task IDs |
 | Old mjlab API | Current API (translated, not redesigned) |
-| Real MJCF, meshes, motor docs, walking CSV | Empty `xmls/`, `xmls/assets/`, `assets/reference/` stubs |
+| Real MJCF, meshes, motor docs, walking CSV | Empty `xmls/`, `xmls/assets/`, `reference/` stubs |
 | Hardware numbers inline | All collected in `wisco_humanoid_constants.py`, marked `TODO` |
 | `deploy.py` with a 47-dim obs built by hand | `sim2sim` entry point that rebuilds the observation from ONNX metadata |
 | `gait_clock` / imitation hardcoded to 12 joints, 2 feet | Foot count and joint columns are derived from the config |
@@ -86,7 +86,7 @@ src/mjlab/asset_zoo/robots/wisco_humanoid/
   __init__.py                   # exports
   xmls/.gitkeep                 # put wisco_humanoid.xml here
   xmls/assets/.gitkeep          # put STL/OBJ files here (meshdir="assets")
-  assets/reference/.gitkeep     # optional walking_reference.csv
+  reference/.gitkeep            # optional walking_reference.csv
   README.md                     # naming conventions + fill-in checklist
 
 src/mjlab/tasks/velocity/config/wisco_humanoid/
@@ -184,7 +184,7 @@ Things that are deliberately rough, so nobody mistakes them for finished work.
 ### The imitation reward is opt-in by file existence
 
 - `env_cfgs.py` only adds the `imitation` reward when
-  `assets/reference/walking_reference.csv` exists. Convenient, but a typo in the path
+  `reference/walking_reference.csv` exists. Convenient, but a typo in the path
   silently disables the reward instead of failing loudly.
 - The CSV is assumed to have a header and one column per joint in robot joint order. That
   contract is documented, not validated; `joint_columns` is the escape hatch.

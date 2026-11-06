@@ -13,15 +13,16 @@ is marked `TODO(wisco-humanoid)`.
 ```
 xmls/wisco_humanoid.xml        # the MuJoCo model
 xmls/assets/*.STL              # visual and collision meshes
-assets/reference/*.csv         # optional walking reference for the imitation reward
+reference/walking_reference.csv # optional cyclic reference for the imitation reward
 ```
 
 Until `xmls/wisco_humanoid.xml` exists, `get_spec()` raises a descriptive error. The
 rest of the package still imports, so `list-envs` and `train --help` work.
 
 Meshes live next to the MJCF in `xmls/assets/` because MuJoCo resolves `meshdir`
-relative to the model file. `assets/reference/` holds non-MJCF data (the optional walking
-reference CSV), not meshes.
+relative to the model file. `reference/` holds non-MJCF data (the optional walking
+reference CSV), so this package has no root `assets/` folder at all — matching the layout
+of the Unitree and YAM packages.
 
 ## MJCF conventions the task configs rely on
 

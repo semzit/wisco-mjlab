@@ -169,7 +169,7 @@ conceptual and the code is only there for backup.
 
 - `src/mjlab/asset_zoo/robots/wisco_humanoid/`.
 - `wisco_humanoid_constants.py` is the single place hardware numbers live.
-- Empty `xmls/`, `xmls/assets/`, `assets/reference/` stubs.
+- Empty `xmls/`, `xmls/assets/`, `reference/` stubs.
 - Lazy `get_spec()` so tasks register before the model exists.
 
 ### 15. Actuator and gain setup

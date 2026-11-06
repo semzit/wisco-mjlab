@@ -45,7 +45,6 @@ WISCO_HUMANOID_WALKING_REFERENCE: Path = (
   / "asset_zoo"
   / "robots"
   / "wisco_humanoid"
-  / "assets"
   / "reference"
   / "walking_reference.csv"
 )

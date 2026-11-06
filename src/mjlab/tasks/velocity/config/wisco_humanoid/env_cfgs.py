@@ -189,7 +189,7 @@ def wisco_humanoid_rough_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
   )
 
   # Imitation reward, only enabled once a reference trajectory has been added to
-  # assets/reference/walking_reference.csv.
+  # reference/walking_reference.csv.
   if WISCO_HUMANOID_WALKING_REFERENCE.exists():
     cfg.rewards["imitation"] = RewardTermCfg(
       func=mdp.imitation_joint_pos,
