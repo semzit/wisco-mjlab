@@ -72,7 +72,7 @@ What changed relative to Asimov:
 | Hardware numbers inline | All collected in `wisco_humanoid_constants.py`, marked `TODO` |
 | `deploy.py` with a 47-dim obs built by hand | `sim2sim` entry point that rebuilds the observation from ONNX metadata |
 | `gait_clock` / imitation hardcoded to 12 joints, 2 feet | Foot count and joint columns are derived from the config |
-| New MDP terms appended to mjlab core | Kept in the robot package (`.../wisco_humanoid/mdp.py`) so upstream source stays unmodified |
+| New MDP terms appended to `observations.py` / `rewards.py` | Added as their own module, `tasks/velocity/mdp/gait.py`, so upstream terms stay untouched |
 
 The result is a template: it imports, registers its tasks and lists them, but any attempt
 to actually build the robot fails with a message telling you which file is missing. That
@@ -93,7 +93,9 @@ src/mjlab/tasks/velocity/config/wisco_humanoid/
   __init__.py                   # registers rough / flat / balance tasks
   env_cfgs.py                   # observation, sensor, reward, command wiring
   rl_cfg.py                     # PPO network and training hyperparameters
-  mdp.py                        # gait_clock, alternating_feet_contact, imitation_joint_pos
+
+src/mjlab/tasks/velocity/mdp/
+  gait.py                       # gait_clock, alternating_feet_contact, imitation_joint_pos
 
 src/mjlab/scripts/sim2sim.py    # uv run sim2sim --policy policy.onnx
 ```
@@ -211,8 +213,9 @@ Things that are deliberately rough, so nobody mistakes them for finished work.
 - Not verified: any rollout, training or play. `xmls/wisco_humanoid.xml` does not exist, so
   the first real test of the dynamics path is still ahead.
 - `uv.lock` was regenerated to add the `sim2sim` optional extra.
-- The new MDP terms are robot-local on purpose, but the robot still has to be exported from
-  `src/mjlab/asset_zoo/robots/__init__.py` (9 added lines), which is the same file upstream
-  uses for G1/Go1/YAM. That is the only upstream source file this scaffold touches.
+- The new MDP terms are a separate module (`tasks/velocity/mdp/gait.py`), so upstream term
+  files are untouched. Two upstream files are edited: a one-line import in
+  `tasks/velocity/mdp/__init__.py` and the 9-line robot export in
+  `src/mjlab/asset_zoo/robots/__init__.py` (the same file upstream uses for G1/Go1/YAM).
 - `README.md` and `docs/source/changelog.rst` were edited on top of upstream, so they will
   conflict if upstream's copies are merged later.

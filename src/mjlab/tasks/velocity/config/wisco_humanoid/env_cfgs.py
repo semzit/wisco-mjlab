@@ -29,8 +29,6 @@ from mjlab.tasks.velocity import mdp
 from mjlab.tasks.velocity.mdp import UniformVelocityCommandCfg
 from mjlab.tasks.velocity.velocity_env_cfg import make_velocity_env_cfg
 
-from . import mdp as robot_mdp
-
 ##
 # Robot-specific names. Update these when the MJCF naming convention changes.
 ##
@@ -129,7 +127,7 @@ def wisco_humanoid_rough_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
 
   # Phase clock for phase-aware locomotion.
   gait_clock_cfg = ObservationTermCfg(
-    func=robot_mdp.gait_clock,
+    func=mdp.gait_clock,
     params={
       "command_name": "twist",
       "command_threshold": 0.1,
@@ -180,7 +178,7 @@ def wisco_humanoid_rough_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
 
   # Alternating foot contacts for a bipedal gait.
   cfg.rewards["alternating_feet"] = RewardTermCfg(
-    func=robot_mdp.alternating_feet_contact,
+    func=mdp.alternating_feet_contact,
     weight=0.5,
     params={
       "sensor_name": feet_ground_cfg.name,
@@ -194,7 +192,7 @@ def wisco_humanoid_rough_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
   # assets/reference/walking_reference.csv.
   if WISCO_HUMANOID_WALKING_REFERENCE.exists():
     cfg.rewards["imitation"] = RewardTermCfg(
-      func=robot_mdp.imitation_joint_pos,
+      func=mdp.imitation_joint_pos,
       weight=1.5,
       params={
         "data_path": str(WISCO_HUMANOID_WALKING_REFERENCE),

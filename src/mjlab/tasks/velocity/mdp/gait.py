@@ -1,9 +1,9 @@
-"""Robot-local MDP terms for the Wisco Humanoid tasks.
+"""Locomotion MDP terms shared by the velocity task.
 
-These live next to the robot config instead of in ``mjlab.tasks.velocity.mdp`` so the
-scaffold stays self-contained: upstream mjlab source is left untouched, which keeps
-future merges conflict-free. Promote a term into the shared ``mdp`` package once it has
-proven useful across several robots.
+Holds the phase clock observation and the alternating-feet and imitation rewards used by
+the Wisco Humanoid tasks. They live in ``mjlab.tasks.velocity.mdp`` so any velocity task
+can enable them through its env config; the robot config only decides whether to use
+them and how to parameterize them.
 """
 
 from __future__ import annotations

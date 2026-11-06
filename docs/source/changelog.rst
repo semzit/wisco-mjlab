@@ -25,9 +25,9 @@ Added
   The velocity, manipulation and tracking runners now share this export path.
 - Added a Wisco Humanoid robot scaffold under
   ``src/mjlab/asset_zoo/robots/wisco_humanoid`` with rough, flat and balance velocity
-  task registrations, robot-local ``gait_clock``, ``alternating_feet_contact`` and
-  ``imitation_joint_pos`` MDP terms, and a ``sim2sim`` entry point that rebuilds the
-  actor observation from exported ONNX metadata.
+  task registrations, ``gait_clock``, ``alternating_feet_contact`` and
+  ``imitation_joint_pos`` MDP terms in ``tasks/velocity/mdp/gait.py``, and a ``sim2sim``
+  entry point that rebuilds the actor observation from exported ONNX metadata.
 
 Changed
 ^^^^^^^

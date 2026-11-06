@@ -76,8 +76,8 @@ conceptual and the code is only there for backup.
   `ManagerTermBase` when it must cache setup or hold per-episode state.
 - Class terms get a `reset()` hook — that is what makes phase clocks and imitation
   trackers possible.
-- *Wisco touch:* all three of our new terms are class-based, and they live in the robot
-  package rather than upstream's shared `mdp`.
+- *Wisco touch:* all three of our new terms are class-based and live in
+  `tasks/velocity/mdp/gait.py`, alongside mjlab's own terms.
 
 ### 7. Manager layer — one config object
 
@@ -201,12 +201,12 @@ conceptual and the code is only there for backup.
 - Added self-collision, alternating-feet and optional imitation.
 - Conservative velocity ranges for a narrow-stance biped.
 
-### 19. Robot-local MDP terms (design decision)
+### 19. New MDP terms (where they live)
 
-- `config/wisco_humanoid/mdp.py`: `gait_clock`, `alternating_feet_contact`,
-  `imitation_joint_pos`.
-- **Why:** Asimov patched `velocity/mdp/*.py`; we keep upstream untouched so merges stay
-  clean.
+- `tasks/velocity/mdp/gait.py`: `gait_clock`, `alternating_feet_contact`,
+  `imitation_joint_pos`, exported through the task's `mdp` package.
+- **Why a separate module:** Asimov patched `observations.py` and `rewards.py` directly;
+  one file of our own keeps the upstream term files untouched and the diff readable.
 - Generalized: foot count from the sensor, phase reset via the manager hook, CSV columns
   configurable.
 
@@ -290,7 +290,7 @@ conceptual and the code is only there for backup.
 16. Task configuration
 17. Sensors and observations
 18. Rewards
-19. Robot-local MDP terms (design decision)
+19. New MDP terms (where they live)
 20. `sim2sim` tool
 21. Tooling and docs
 22. Validation status (honest slide)

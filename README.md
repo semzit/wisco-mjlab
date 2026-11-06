@@ -173,7 +173,8 @@ uv run play Mjlab-Velocity-Flat-Wisco-Humanoid --agent random
 
 ```
 src/mjlab/asset_zoo/robots/wisco_humanoid/     # robot constants, XML + mesh slots
-src/mjlab/tasks/velocity/config/wisco_humanoid/ # task configs + robot-local MDP terms
+src/mjlab/tasks/velocity/config/wisco_humanoid/ # task configs
+src/mjlab/tasks/velocity/mdp/gait.py           # gait clock, alternating feet, imitation
 src/mjlab/scripts/sim2sim.py                    # ONNX policy -> plain MuJoCo rollout
 SCAFFOLD.md                                     # orientation + known shortcuts
 ```
