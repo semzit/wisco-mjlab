@@ -2,160 +2,190 @@
 
 Working outline for a talk in two halves:
 
-- **Top section — MJLab / Taxonomy:** what mjlab is, subsystem by subsystem.
+- **Top section — MJLab / Taxonomy:** the system as the [official documentation](https://mujocolab.github.io/mjlab/main/source/architecture_overview.html)
+  describes it: two layers, the simulation components, the manager layer, and the
+  environment lifecycle.
 - **Bottom section — Wisco-Mjlab / What we changed:** how this fork adapts mjlab for the
   Wisco Humanoid.
 
-Every slide references real paths in the repository so code can be shown live. Roughly 27
-slides; trim to ~18 for a 15-minute slot by collapsing slides 8–10 and 17–19.
+The top section follows mjlab's own docs page by page rather than walking the source tree;
+file paths appear once, on the concept-to-code mapping slide (12), so the talk stays
+conceptual and the code is only there for backup.
 
 ---
 
 ## Top section — MJLab / Taxonomy
 
-### 1. What is mjlab (one-slide thesis)
+### 1. What is mjlab — two layers
 
-- Isaac Lab's API (managers, MDP terms, cfg dataclasses) on a MuJoCo Warp backend.
-- Single GPU, thousands of parallel environments, no Omniverse.
-- One repo covers simulation + MDP + RL + export + viewers.
-- Why we use it: Isaac Lab abstractions, lightweight enough for a student team.
+- The docs describe mjlab as **a simulation layer** (robot and world) plus **a manager
+  layer** (the RL problem defined on top).
+- The simulation layer is MuJoCo + MuJoCo Warp; the manager layer is Isaac Lab's
+  manager-based MDP.
+- Keep that split in mind: every later slide belongs to one of the two.
+- Doc: [Architecture Overview](https://mujocolab.github.io/mjlab/main/source/architecture_overview.html)
 
-### 2. The data flow (diagram slide)
+### 2. Architecture at a glance
 
-- MJCF + meshes → `EntityCfg` → `SceneCfg` → `ManagerBasedRlEnv`.
-- Managers read and write the MDP on every `step()`.
-- `rl/` trains PPO → `play` evaluates → ONNX export → `sim2sim` deploys.
-- Put this early; every later slide hangs off it.
+- Show the official diagram: entities composed into an `MjSpec`, compiled to `MjModel`,
+  transferred to MuJoCo Warp; `ManagerBasedRlEnv` orchestrates; RSL-RL trains.
+- One sentence per box on the diagram; do not explain details yet.
+- Doc image: `architecture_diagram.png` from the architecture page.
+- This is the slide people photograph.
 
-### 3. `sim/` — the physics backend
+### 3. Simulation layer — the scene pipeline
 
-- `SimulationCfg`, `MujocoCfg`, `SimData`.
-- Timestep, solver iterations, `nconmax`, `njmax`, `ccd_iterations`, CUDA graphs.
-- Warp/CPU backend selection; `randomization.py` for sim-level domain randomization.
-- *Wisco:* G1's limits were copied as placeholders.
+- Every entity starts as an MJCF loaded with `MjSpec.from_file()`.
+- Python dataclasses can **extend or override** the loaded spec: actuators, collision
+  rules, materials, sensors, initial state.
+- Entities are composed into one `MjSpec`, compiled to `MjModel` on CPU, then uploaded.
+- Takeaway: start from an existing MuJoCo model, layer task config on top, never rewrite
+  the XML.
+- Doc: [Scene](https://mujocolab.github.io/mjlab/main/source/scene.html)
 
-### 4. `entity/` — what a robot is
+### 4. Simulation layer — MuJoCo Warp
 
-- `EntityCfg` (init state, collisions, `spec_fn`, articulation) vs runtime `Entity`
-  (`data.py`).
-- `EntityData`: joint pos/vel, body poses, root state — everything observations read.
-- MJCF loads through `spec_fn` and resolves lazily.
-- *Wisco:* `get_wisco_humanoid_robot_cfg()` returns a fresh cfg per call.
+- GPU backend that keeps MuJoCo's `MjModel` / `MjData` paradigm.
+- Adds a leading **world** dimension: one `MjData` holds N independent simulations.
+- Model parameters shared by default; fields expand per-world only when domain
+  randomization needs it.
+- The step is captured as a **CUDA graph** — recorded once, replayed; resets and DR run as
+  normal Python between replays.
+- Doc: [Architecture Overview → MuJoCo Warp](https://mujocolab.github.io/mjlab/main/source/architecture_overview.html#the-simulation-layer)
 
-### 5. `actuator/` — how joints are driven
+### 5. Simulation layer — the four components
 
-- `BuiltinPositionActuatorCfg` (MJCF position servo), DC motor, learned actuator, XML
-  actuators.
-- Groups: `builtin_group`, `fused_group`.
-- Per actuator: stiffness, damping, effort limit, armature, `target_names_expr`.
-- *Wisco:* five joint families, `KP = J·ω²`, capped `KD`, action scale `0.3·effort/KP`.
+- **Entity** — a robot, a manipulated object, or static terrain: MJCF plus optional
+  actuator/collision/initial-state config.
+  [docs](https://mujocolab.github.io/mjlab/main/source/entity/index.html)
+- **Actuators** — how entities are controlled; wrap MJCF actuators or define new ones in
+  Python. [docs](https://mujocolab.github.io/mjlab/main/source/actuators.html)
+- **Sensors** — how the world is observed: MuJoCo-native sensors plus RGB-D cameras and
+  raycasters. [docs](https://mujocolab.github.io/mjlab/main/source/sensors/index.html)
+- **Scene** + **Terrain** — composition and placement of entities.
+  [scene](https://mujocolab.github.io/mjlab/main/source/scene.html) ·
+  [terrain](https://mujocolab.github.io/mjlab/main/source/terrain.html)
+- *Wisco touch:* we touch all four — robot package, joint families, contact/ray sensors,
+  plane vs generated terrain.
 
-### 6. `sensor/` — how the robot perceives
+### 6. Manager layer — terms are the unit of composition
 
-- Builtin (IMU/gyro), `ContactSensor`, `RayCastSensor`, `CameraSensor`,
-  `TerrainHeightSensor`.
-- `ObjRef` for frame references (`type`, `name`, `entity`).
-- Pattern configs: `GridPatternCfg`, `RingPatternCfg`.
-- *Wisco:* feet contact, self-collision, foot-height scan, terrain scan.
+- An environment is a set of small, self-contained **terms**: rewards, observations,
+  events, commands, and so on.
+- A term is a plain function for stateless work, or a **class** deriving from
+  `ManagerTermBase` when it must cache setup or hold per-episode state.
+- Class terms get a `reset()` hook — that is what makes phase clocks and imitation
+  trackers possible.
+- *Wisco touch:* all three of our new terms are class-based, and they live in the robot
+  package rather than upstream's shared `mdp`.
 
-### 7. `scene/` + `terrains/` — the world
+### 7. Manager layer — one config object
 
-- `SceneCfg`: entities, sensors, terrain, extent.
-- Terrain generator, heightfields, primitives, curriculum hooks.
-- `TerrainEntityCfg` with `terrain_type="plane"` vs `"generator"`.
-- *Wisco:* rough = generator + curriculum, flat = plane.
+- Everything is described by `ManagerBasedRlEnvCfg`, a plain dataclass of term
+  dictionaries.
+- Fields: `scene`, `sim`, `observations`, `actions`, `rewards`, `terminations`, `events`,
+  `commands`, `curriculum`, `metrics`, plus `decimation` and `episode_length_s`.
+- `decimation = 4` means four physics steps per policy step — the value our tasks inherit.
+- Doc: [Environment Configuration](https://mujocolab.github.io/mjlab/main/source/environment_config.html)
 
-### 8. `managers/` — the MDP engine (part 1: the interface)
+### 8. Manager layer — the eight managers
 
-- One manager per term family; all share `ManagerBase` + `ManagerTermBaseCfg`.
-- A term is a **function** or a **class** instantiated as `(cfg, env)`.
-- Class terms can implement `reset(env_ids)` — this is why the clock terms are classes.
-- *Wisco:* the three new terms are class-based and robot-local.
+| Manager | Responsibility | Doc |
+| --- | --- | --- |
+| Observation | Assembles groups; clip, noise, delay, history; asymmetric actor-critic | [observations](https://mujocolab.github.io/mjlab/main/source/observations.html) |
+| Action | Routes the policy tensor to actuators; scale and offset | [actions](https://mujocolab.github.io/mjlab/main/source/actions.html) |
+| Reward | Weighted sum, scaled by step duration | [rewards](https://mujocolab.github.io/mjlab/main/source/rewards.html) |
+| Termination | Stop conditions; terminal vs timeout | [terminations](https://mujocolab.github.io/mjlab/main/source/terminations.html) |
+| Event | Fires at startup / reset / interval; implements DR | [events](https://mujocolab.github.io/mjlab/main/source/events.html) |
+| Command | Generates and resamples goals | [commands](https://mujocolab.github.io/mjlab/main/source/commands.html) |
+| Curriculum | Adjusts training conditions by performance | [curriculum](https://mujocolab.github.io/mjlab/main/source/curriculum.html) |
+| Metrics | Logs per-step values as episode averages | [metrics](https://mujocolab.github.io/mjlab/main/source/metrics.html) |
 
-### 9. `managers/` — the MDP loop (part 2)
+- Plus **Recorders** for dataset capture: [recorders](https://mujocolab.github.io/mjlab/main/source/recorders.html)
+- *Wisco touch:* observations, actions, rewards, events and curriculum are the ones we edit.
 
-- `observation_manager`: groups, noise, clip, scale, delay, history.
-- `action_manager`: `JointPositionAction`, scale, offset.
-- `command_manager`: `UniformVelocityCommandCfg`.
-- `reward_manager`, `termination_manager`.
-- *Wisco:* edit the `actor` group, set action scale, constrain the twist command.
+### 9. Environment lifecycle — the four phases
 
-### 10. `managers/` — training-time concerns (part 3)
+- **Build:** `Scene` composes MJCFs into `MjSpec`, compiles `MjModel`, `Simulation`
+  uploads to the GPU, CUDA graphs captured.
+- **Initialize:** managers built, regexes resolved to joint/body/geom indices, history and
+  delay buffers allocated, DR fields expanded, startup events fired once.
+- **Reset:** reset events randomize the scene, commands resampled, history cleared.
+- **Step:** action → physics → termination → reward → events → resets → observations.
+- Doc: [Architecture Overview → lifecycle](https://mujocolab.github.io/mjlab/main/source/architecture_overview.html#the-environment-lifecycle)
 
-- `event_manager`: `startup` / `reset` / `interval` (push, friction, COM, encoder bias).
-- `curriculum_manager`: terrain levels and command ranges.
-- `metrics_manager`, `recorder_manager`.
-- *Wisco:* added `base_com` body names, kept push/friction events, terrain curriculum.
+### 10. The step sequence (deep dive)
 
-### 11. `envs/mdp/` — the shared term library
+- The documented order, worth showing verbatim:
+  `process_action` → `for decimation: apply_action / sim.step / scene.update` →
+  `termination` → `reward` → `metrics` → step/interval events → reset → `sim.forward()` →
+  `command` → `sim.sense()` → `observation`.
+- Why it matters: observations are computed **after** the physics and resets, which is why
+  a phase clock advances once per control step.
+- This slide explains any "why is my reward one step late" question.
+- *Wisco touch:* our clock terms advance in `__call__`, reset in `reset()`.
 
-- Actions, observations, rewards, terminations, events, `dr/`.
-- Function terms vs class terms; `SceneEntityCfg` resolution.
-- *Wisco:* `variable_posture`, `self_collision_cost`, `feet_*` come from here.
+### 11. Training and debugging surface
 
-### 12. `tasks/` + registry — how a task becomes a command
+- **RSL-RL** runner and PPO configs:
+  [training/rsl_rl](https://mujocolab.github.io/mjlab/main/source/training/rsl_rl.html)
+- Viewers — native, viser, offscreen:
+  [viewers](https://mujocolab.github.io/mjlab/main/source/viewers.html)
+- Distributed and cloud training:
+  [distributed](https://mujocolab.github.io/mjlab/main/source/training/distributed_training.html) ·
+  [cloud](https://mujocolab.github.io/mjlab/main/source/training/cloud.html)
+- Debugging: [NaN guard](https://mujocolab.github.io/mjlab/main/source/debugging/nan_guard.html) ·
+  [export scene](https://mujocolab.github.io/mjlab/main/source/debugging/export_scene.html)
+- *Wisco touch:* we add one entry point here, `sim2sim`, and the ONNX export contract.
 
-- `register_mjlab_task(task_id, env_cfg, play_env_cfg, rl_cfg, runner_cls)`.
-- Auto-import of `tasks/**/config/*`.
-- Task ID convention: `Mjlab-Velocity-Flat-Unitree-G1`.
-- *Wisco:* three IDs, visible in `uv run list-envs`.
+### 12. Concept → code map (the only file-path slide)
 
-### 13. `rl/` — training and export
+| Concept | Path |
+| --- | --- |
+| Entity, actuators, sensors | `src/mjlab/entity/`, `actuator/`, `sensor/` |
+| Scene, terrain | `src/mjlab/scene/`, `terrains/` |
+| Simulation backend | `src/mjlab/sim/` |
+| Managers, MDP terms | `src/mjlab/managers/`, `envs/mdp/` |
+| Environment | `src/mjlab/envs/manager_based_rl_env.py` |
+| Tasks and registry | `src/mjlab/tasks/` |
+| RL, export | `src/mjlab/rl/` |
+| Referenced robots | `src/mjlab/asset_zoo/robots/` |
+| CLI and viewers | `src/mjlab/scripts/`, `viewer/` |
 
-- `RslRlOnPolicyRunnerCfg`, `RslRlModelCfg`, `RslRlPpoAlgorithmCfg`.
-- Vecenv wrapper, `MjlabOnPolicyRunner`.
-- `exporter_utils.py`: ONNX metadata (joint names, KP/KD, defaults, action scale,
-  observation layout).
-- *Wisco:* that metadata is the contract `sim2sim` depends on.
-
-### 14. `asset_zoo/` — reference robots
-
-- G1, Go1, YAM as worked examples.
-- Each is a constants module + XML + meshes + factory function.
-- *Wisco:* our package copies this shape.
-
-### 15. `viewer/` + `scripts/` — the outer shell
-
-- Native viewer, viser, debug visualizer, offscreen renderer.
-- `train`, `play`, `list-envs`, `export-scene`, `nan_viz`, `csv_to_npz`.
-- *Wisco:* added the `sim2sim` entry point.
-
-### 16. `utils/` — the glue
-
-- Lab API math (quaternion ops), noise, buffers, spec config, actuator helpers.
-- *Wisco:* `reflected_inertia_from_two_stage_planetary` is the G1 armature reference.
+- Use this only if someone asks "where does that live?"
+- Hand-off to the bottom section: "now the parts we actually changed."
 
 ---
 
 ## Bottom section — Wisco-Mjlab / What we changed
 
-### 17. Repository setup
+### 13. Repository setup
 
 - Genuine fork of `mujocolab/mjlab`, public; `main` carries the scaffold.
 - Remotes: `origin` (our fork), `upstream` (mjlab), `asimov` (Menlo reference).
 - No merge of the Asimov branch — the scaffold is a port onto current `main`.
 
-### 18. New robot package
+### 14. New robot package
 
 - `src/mjlab/asset_zoo/robots/wisco_humanoid/`.
 - `wisco_humanoid_constants.py` is the single place hardware numbers live.
 - Empty `xmls/`, `assets/meshes/`, `assets/reference/` stubs.
 - Lazy `get_spec()` so tasks register before the model exists.
 
-### 19. Actuator and gain setup
+### 15. Actuator and gain setup
 
 - Five joint families: hip pitch / roll / yaw, knee, ankle.
 - Reflected inertia, physics-based KP, hardware-capped KD.
 - Action scale derived from effort/stiffness.
 - All values marked `TODO(wisco-humanoid)`.
 
-### 20. Task configuration
+### 16. Task configuration
 
 - Three tasks: Rough (curriculum), Flat (plane), Balance (no velocity command).
 - Flat also strips the terrain scan, `height_scan` and the out-of-bounds termination.
 - Play mode: infinite episodes, no corruption, no pushes, small terrain grid.
 
-### 21. Sensors and observations
+### 17. Sensors and observations
 
 - Feet-ground contact sensor; self-collision sensor with force history.
 - Foot-height scan wired to `left_foot` / `right_foot` sites via `ObjRef` +
@@ -164,14 +194,14 @@ slides; trim to ~18 for a 15-minute slot by collapsing slides 8–10 and 17–19
 - **Removed** `base_lin_vel` (no state estimator).
 - **Added** `gait_clock` to actor and critic.
 
-### 22. Rewards
+### 18. Rewards
 
 - Inherited mjlab weights for tracking, upright, pose and foot terms.
 - Pose standard deviations tuned per joint family.
 - Added self-collision, alternating-feet and optional imitation.
 - Conservative velocity ranges for a narrow-stance biped.
 
-### 23. Robot-local MDP terms (design decision)
+### 19. Robot-local MDP terms (design decision)
 
 - `config/wisco_humanoid/mdp.py`: `gait_clock`, `alternating_feet_contact`,
   `imitation_joint_pos`.
@@ -180,28 +210,28 @@ slides; trim to ~18 for a 15-minute slot by collapsing slides 8–10 and 17–19
 - Generalized: foot count from the sensor, phase reset via the manager hook, CSV columns
   configurable.
 
-### 24. `sim2sim` tool
+### 20. `sim2sim` tool
 
 - One entry point: `uv run sim2sim --policy policy.onnx`.
 - Rebuilds the observation from ONNX metadata instead of a hardcoded 47-dim vector.
 - Rebuilds position actuators from KP/KD metadata plus the armature constants.
 - Generic plots, optional video, push tests; no terrain support.
 
-### 25. Tooling and docs
+### 21. Tooling and docs
 
 - `pyproject.toml`: `sim2sim` extra and console script.
 - Nine-line robot export in `asset_zoo/robots/__init__.py` — the only upstream source edit.
 - README rewritten in the Asimov style with logo; `SCAFFOLD.md` orientation doc.
 - Changelog entry and credits (mjlab, Menlo Research, WiscoHumanoids).
 
-### 26. Validation status (honest slide)
+### 22. Validation status (honest slide)
 
 - `uv run list-envs` → all three tasks.
 - 18 config tests pass; full fast suite 1122 passed, 13 skipped.
 - `ruff` and `ty` clean; the package imports without the model.
 - **Not tested:** any rollout, because the MJCF does not exist yet.
 
-### 27. What is still placeholder / next steps
+### 23. What is still placeholder / next steps
 
 - Add `xmls/wisco_humanoid.xml` and the meshes.
 - Fill rotor inertia, gear ratio, torque and standing height.
@@ -213,14 +243,14 @@ slides; trim to ~18 for a 15-minute slot by collapsing slides 8–10 and 17–19
 
 ## Bridge slide (place between the two sections)
 
-| Taxonomy area | What we changed |
+| Documentation concept | What we changed |
 | --- | --- |
-| `entity/`, `actuator/` | New robot package, joint families, gains, action scale |
-| `sensor/` | Feet contact, self-collision, foot-height scan, terrain frame |
-| `managers/` observations | Removed `base_lin_vel`, added `gait_clock` |
-| `managers/` rewards | Pose stds, self-collision, alternating feet, imitation |
-| `tasks/` | Three task IDs, rough/flat/balance |
-| `rl/` + `scripts/` | `sim2sim` driven by ONNX metadata |
+| Entity + actuators | New robot package, joint families, gains, action scale |
+| Sensors | Feet contact, self-collision, foot-height scan, terrain frame |
+| Observations | Removed `base_lin_vel`, added `gait_clock` |
+| Rewards | Pose stds, self-collision, alternating feet, imitation |
+| Environment config / tasks | Three task IDs, rough / flat / balance |
+| Training + export | `sim2sim` driven by ONNX metadata |
 
 ---
 
@@ -228,9 +258,9 @@ slides; trim to ~18 for a 15-minute slot by collapsing slides 8–10 and 17–19
 
 | Section | Slides | Time |
 | --- | --- | --- |
-| MJLab / Taxonomy | 1–16 | ~8 min |
+| MJLab / Taxonomy | 1–12 | ~9 min |
 | Bridge | — | ~1 min |
-| Wisco-Mjlab / Changes | 17–27 | ~6 min |
+| Wisco-Mjlab / Changes | 13–23 | ~6 min |
 | Questions | — | rest |
 
 ---
@@ -239,38 +269,34 @@ slides; trim to ~18 for a 15-minute slot by collapsing slides 8–10 and 17–19
 
 **Top section — MJLab / Taxonomy**
 
-1. What is mjlab
-2. The data flow
-3. `sim/` — the physics backend
-4. `entity/` — what a robot is
-5. `actuator/` — how joints are driven
-6. `sensor/` — how the robot perceives
-7. `scene/` + `terrains/` — the world
-8. `managers/` — the MDP engine (part 1: the interface)
-9. `managers/` — the MDP loop (part 2)
-10. `managers/` — training-time concerns (part 3)
-11. `envs/mdp/` — the shared term library
-12. `tasks/` + registry — how a task becomes a command
-13. `rl/` — training and export
-14. `asset_zoo/` — reference robots
-15. `viewer/` + `scripts/` — the outer shell
-16. `utils/` — the glue
+1. What is mjlab — two layers
+2. Architecture at a glance
+3. Simulation layer — the scene pipeline
+4. Simulation layer — MuJoCo Warp
+5. Simulation layer — the four components
+6. Manager layer — terms are the unit of composition
+7. Manager layer — one config object
+8. Manager layer — the eight managers
+9. Environment lifecycle — the four phases
+10. The step sequence
+11. Training and debugging surface
+12. Concept → code map
 
 **Bottom section — Wisco-Mjlab / What we changed**
 
-17. Repository setup
-18. New robot package
-19. Actuator and gain setup
-20. Task configuration
-21. Sensors and observations
-22. Rewards
-23. Robot-local MDP terms (design decision)
-24. `sim2sim` tool
-25. Tooling and docs
-26. Validation status (honest slide)
-27. What is still placeholder / next steps
+13. Repository setup
+14. New robot package
+15. Actuator and gain setup
+16. Task configuration
+17. Sensors and observations
+18. Rewards
+19. Robot-local MDP terms (design decision)
+20. `sim2sim` tool
+21. Tooling and docs
+22. Validation status (honest slide)
+23. What is still placeholder / next steps
 
 **Interstitial**
 
-- Bridge: taxonomy → changes table
+- Bridge: documentation concept → changes table
 - Questions
