@@ -63,7 +63,7 @@ def get_spec() -> mujoco.MjSpec:
       f"Robot MJCF not found at {WISCO_HUMANOID_XML}.\n"
       "Add the robot model to "
       "src/mjlab/asset_zoo/robots/wisco_humanoid/xmls/wisco_humanoid.xml and its "
-      "meshes under src/mjlab/asset_zoo/robots/wisco_humanoid/assets/meshes/. "
+      "meshes under src/mjlab/asset_zoo/robots/wisco_humanoid/xmls/assets/. "
       "See the package README for the expected naming conventions."
     )
   return mujoco.MjSpec.from_file(str(WISCO_HUMANOID_XML))

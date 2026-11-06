@@ -12,12 +12,16 @@ is marked `TODO(wisco-humanoid)`.
 
 ```
 xmls/wisco_humanoid.xml        # the MuJoCo model
-assets/meshes/*.STL            # visual and collision meshes
+xmls/assets/*.STL              # visual and collision meshes
 assets/reference/*.csv         # optional walking reference for the imitation reward
 ```
 
 Until `xmls/wisco_humanoid.xml` exists, `get_spec()` raises a descriptive error. The
 rest of the package still imports, so `list-envs` and `train --help` work.
+
+Meshes live next to the MJCF in `xmls/assets/` because MuJoCo resolves `meshdir`
+relative to the model file. `assets/reference/` holds non-MJCF data (the optional walking
+reference CSV), not meshes.
 
 ## MJCF conventions the task configs rely on
 
@@ -30,7 +34,7 @@ rest of the package still imports, so `list-envs` and `train --help` work.
 | Foot collision geoms | `{left,right}_ankle_roll_link_collision` |
 | Base body | `pelvis_link` |
 | IMU sensors | `imu_lin_vel`, `imu_ang_vel` |
-| Mesh directory | `assets/meshes`, declared via `<compiler meshdir="...">` |
+| Mesh directory | `xmls/assets`, declared via `<compiler meshdir="assets">` |
 
 If your robot uses different names, update the regex patterns in
 `wisco_humanoid_constants.py` and in
@@ -65,7 +69,7 @@ armature and the deployment XML will make a policy fall over immediately.
 
 ## Checklist
 
-1. Drop the MJCF into `xmls/` and the meshes into `assets/meshes/`.
+1. Drop the MJCF into `xmls/` and the meshes into `xmls/assets/`.
 2. Fill in `J_rotor`, `gear_ratio` and peak torque per joint in
    `wisco_humanoid_constants.py`, then recompute the derived constants.
 3. Set `HOME_KEYFRAME.pos` (standing height) to match the real model kinematics.
