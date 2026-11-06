@@ -5,11 +5,20 @@ Humanoid tasks. They live in ``mjlab.tasks.velocity.mdp`` so any velocity task c
 them through its env config; the robot config only decides whether to use them and how to
 parameterize them.
 
-Both terms are ported from the Asimov fork of mjlab by Menlo Research
-(https://github.com/menloresearch/asimov-mjlab), where the gait clock follows Booster's
-sin/cos phase convention. Local changes: phase reset goes through the manager ``reset()``
-hook instead of reading the termination buffer, the foot count is taken from the contact
-sensor, and the frequency and command threshold are parameters rather than constants.
+Neither term is part of upstream mjlab: both are additions carried in this fork and only
+run when a robot config opts in. They are ported from the Asimov fork of mjlab by Menlo
+Research (https://github.com/menloresearch/asimov-mjlab), where the gait clock follows
+Booster's sin/cos phase convention.
+
+Worth knowing before reusing them: Menlo's write-up of the Asimov walking policy takes the
+opposite position, listing "No Gait Clock" and arguing the policy should discover its own
+gait frequency from the command and body dynamics
+(https://menlo.ai/research/teaching-a-humanoid-to-walk). The implementation still ships in
+the Asimov fork, and the Wisco config enables it.
+
+Local changes: phase reset goes through the manager ``reset()`` hook instead of reading the
+termination buffer, the foot count is taken from the contact sensor, and the frequency and
+command threshold are parameters rather than constants.
 """
 
 from __future__ import annotations

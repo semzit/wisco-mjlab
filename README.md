@@ -181,7 +181,10 @@ SCAFFOLD.md                                     # orientation + known shortcuts
   [Menlo Research](https://menlo.ai) — the inspiration for this scaffold and its
   reference implementation: the Asimov robot package, velocity task configs,
   reflected-inertia and PD-gain approach, the gait clock / alternating-feet / imitation
-  rewards, and the original `deploy.py` deployment script.
+  rewards, and the original `deploy.py` deployment script. Their
+  [walking-policy write-up](https://menlo.ai/research/teaching-a-humanoid-to-walk) explains
+  the observation and reward choices, including why they ultimately left the gait clock
+  out of the Asimov policy.
 - **[WiscoHumanoids](https://www.linkedin.com/company/wiscohumanoids)** — the robot this
   scaffold is being adapted for.
 
