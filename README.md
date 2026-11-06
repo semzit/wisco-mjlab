@@ -7,7 +7,7 @@ Wisconsin–Madison by [WiscoHumanoids](https://www.linkedin.com/company/wiscohu
 Inspired by [asimov-mjlab](https://github.com/menloresearch/asimov-mjlab) by
 [Menlo Research](https://menlo.ai) — their Asimov fork is the reference this scaffold
 follows, from the robot package layout and gait-clock terms to the
-original sim2sim workflow.
+original deployment tooling.
 
 <p align="center">
   <img src="docs/static/wiscohumanoids_logo.jpg" alt="Wisco Humanoids" height="180"/>
@@ -22,16 +22,7 @@ original sim2sim workflow.
 
 ## Demo
 
-**Sim2Sim in MuJoCo** — velocity tracking with an exported ONNX policy:
-
 _Recording to be added once a policy is trained._
-
-To record one yourself:
-
-```bash
-uv sync --extra sim2sim
-uv run sim2sim --policy path/to/policy.onnx --cmd_vx 0.5
-```
 
 ---
 
@@ -174,7 +165,6 @@ uv run play Mjlab-Velocity-Flat-Wisco-Humanoid --agent random
 src/mjlab/asset_zoo/robots/wisco_humanoid/     # robot constants, XML + mesh slots
 src/mjlab/tasks/velocity/config/wisco_humanoid/ # task configs
 src/mjlab/tasks/velocity/mdp/gait.py           # gait clock, alternating feet
-src/mjlab/scripts/sim2sim.py                    # ONNX policy -> plain MuJoCo rollout
 SCAFFOLD.md                                     # orientation + known shortcuts
 ```
 
@@ -191,7 +181,7 @@ SCAFFOLD.md                                     # orientation + known shortcuts
   [Menlo Research](https://menlo.ai) — the inspiration for this scaffold and its
   reference implementation: the Asimov robot package, velocity task configs,
   reflected-inertia and PD-gain approach, the gait clock / alternating-feet / imitation
-  rewards, and the original `deploy.py` that `sim2sim` is based on.
+  rewards, and the original `deploy.py` deployment script.
 - **[WiscoHumanoids](https://www.linkedin.com/company/wiscohumanoids)** — the robot this
   scaffold is being adapted for.
 

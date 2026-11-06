@@ -136,7 +136,8 @@ conceptual and the code is only there for backup.
   [cloud](https://mujocolab.github.io/mjlab/main/source/training/cloud.html)
 - Debugging: [NaN guard](https://mujocolab.github.io/mjlab/main/source/debugging/nan_guard.html) ·
   [export scene](https://mujocolab.github.io/mjlab/main/source/debugging/export_scene.html)
-- *Wisco touch:* we add one entry point here, `sim2sim`, and the ONNX export contract.
+- *Wisco touch:* no new entry points; ONNX export is upstream, deployment tooling is
+  still to come.
 
 ### 12. Concept → code map (the only file-path slide)
 
@@ -210,33 +211,25 @@ conceptual and the code is only there for backup.
 - Generalized: foot count from the sensor, phase reset via the manager hook, CSV columns
   configurable.
 
-### 20. `sim2sim` tool
+### 20. Tooling and docs
 
-- One entry point: `uv run sim2sim --policy policy.onnx`.
-- Rebuilds the observation from ONNX metadata instead of a hardcoded 47-dim vector.
-- Rebuilds position actuators from KP/KD metadata plus the armature constants.
-- Generic plots, optional video, push tests; no terrain support.
-
-### 21. Tooling and docs
-
-- `pyproject.toml`: `sim2sim` extra and console script.
 - Nine-line robot export in `asset_zoo/robots/__init__.py` — the only upstream source edit.
 - README rewritten in the Asimov style with logo; `SCAFFOLD.md` orientation doc.
 - Changelog entry and credits (mjlab, Menlo Research, WiscoHumanoids).
 
-### 22. Validation status (honest slide)
+### 21. Validation status (honest slide)
 
 - `uv run list-envs` → all three tasks.
 - 18 config tests pass; full fast suite 1122 passed, 13 skipped.
 - `ruff` and `ty` clean; the package imports without the model.
 - **Not tested:** any rollout, because the MJCF does not exist yet.
 
-### 23. What is still placeholder / next steps
+### 22. What is still placeholder / next steps
 
 - Add `xmls/wisco_humanoid.xml` and the meshes.
 - Fill rotor inertia, gear ratio, torque and standing height.
 - Retune pose stds, velocity ranges and reward weights.
-- Train flat → rough → balance, then run `sim2sim`.
+- Train flat → rough → balance.
 - `SCAFFOLD.md` "Known hacks" has the shortcut list.
 
 ---
@@ -250,7 +243,6 @@ conceptual and the code is only there for backup.
 | Observations | Removed `base_lin_vel`, added `gait_clock` |
 | Rewards | Pose stds, self-collision, alternating feet |
 | Environment config / tasks | Three task IDs, rough / flat / balance |
-| Training + export | `sim2sim` driven by ONNX metadata |
 
 ---
 
@@ -260,7 +252,7 @@ conceptual and the code is only there for backup.
 | --- | --- | --- |
 | MJLab / Taxonomy | 1–12 | ~9 min |
 | Bridge | — | ~1 min |
-| Wisco-Mjlab / Changes | 13–23 | ~6 min |
+| Wisco-Mjlab / Changes | 13–22 | ~6 min |
 | Questions | — | rest |
 
 ---
@@ -291,10 +283,9 @@ conceptual and the code is only there for backup.
 17. Sensors and observations
 18. Rewards
 19. New MDP terms (where they live)
-20. `sim2sim` tool
-21. Tooling and docs
-22. Validation status (honest slide)
-23. What is still placeholder / next steps
+20. Tooling and docs
+21. Validation status (honest slide)
+22. What is still placeholder / next steps
 
 **Interstitial**
 

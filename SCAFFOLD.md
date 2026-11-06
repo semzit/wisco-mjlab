@@ -70,7 +70,7 @@ What changed relative to Asimov:
 | Old mjlab API | Current API (translated, not redesigned) |
 | Real MJCF, meshes, motor docs, walking CSV | Empty `xmls/` and `xmls/assets/` stubs |
 | Hardware numbers inline | All collected in `wisco_humanoid_constants.py`, marked `TODO` |
-| `deploy.py` with a 47-dim obs built by hand | `sim2sim` entry point that rebuilds the observation from ONNX metadata |
+| `deploy.py` with a 47-dim obs built by hand | Not ported yet; deployment tooling is future work |
 | `gait_clock` / alternating feet hardcoded to 12 joints, 2 feet | Foot count derived from the contact sensor |
 | New MDP terms appended to `observations.py` / `rewards.py` | Added as their own module, `tasks/velocity/mdp/gait.py`, so upstream terms stay untouched |
 
@@ -95,8 +95,6 @@ src/mjlab/tasks/velocity/config/wisco_humanoid/
 
 src/mjlab/tasks/velocity/mdp/
   gait.py                       # gait_clock, alternating_feet_contact
-
-src/mjlab/scripts/sim2sim.py    # uv run sim2sim --policy policy.onnx
 ```
 
 ### How the pieces connect
@@ -112,9 +110,6 @@ env_cfgs.py ──► ManagerBasedRlEnvCfg (observations, rewards, commands, sen
    │
    ▼
 train ──► play ──► ONNX export (gains + defaults + observation layout in metadata)
-   │
-   ▼
-sim2sim ──► plain MuJoCo rollout with video, CSV and plots
 ```
 
 ### What is still a placeholder
@@ -133,8 +128,6 @@ robot model exists.
 uv sync                              # core install
 uv run list-envs                     # the three Wisco tasks appear
 uv run train Mjlab-Velocity-Flat-Wisco-Humanoid --env.scene.num-envs 4096
-uv sync --extra sim2sim              # optional: onnx + onnxruntime + opencv + matplotlib
-uv run sim2sim --policy logs/policy.onnx --cmd_vx 0.5
 ```
 
 Training and play will fail until `xmls/wisco_humanoid.xml` exists. `list-envs`,
@@ -180,30 +173,12 @@ Things that are deliberately rough, so nobody mistakes them for finished work.
 - The original reset the phase from `termination_manager.terminated` on every step; this
   version relies on the manager calling `reset(env_ids)`.
 
-### `sim2sim` is metadata-driven, but not metadata-complete
-
-- It ignores `observation_terms_history_length`, `observation_terms_flatten_history_dim`
-  and the `delay_*` metadata. A policy exported with observation history or latency will
-  build the wrong observation size and fail the explicit size check rather than silently
-  running.
-- It assumes `joint_pos`, `joint_vel` and `actions` are `num_actions` wide and that
-  `command` is 3-wide. Any other term raises `NotImplementedError`.
-- `joint_pos` is always treated as relative to the default pose (the `biased=True` case).
-- Angular velocity prefers an `imu_ang_vel` sensor and falls back to
-  `mj_objectVelocity`; small numerical differences from the training sensor are possible.
-- Armature and effort lookup takes the first regex match, and silently falls back to
-  `100 Nm` / `0 armature` when nothing matches.
-- Flat terrain only. `height_scan` and foot contact terms are not reconstructed.
-- Video and plots need the `sim2sim` extra; without OpenCV or matplotlib the run degrades
-  to a warning instead of failing.
-
 ### Validation status
 
 - Verified: package imports, `uv run list-envs` (all three tasks), 18 config and velocity
   tests, `ruff format` / `ruff check`, `py_compile`, `ty check`.
 - Not verified: any rollout, training or play. `xmls/wisco_humanoid.xml` does not exist, so
   the first real test of the dynamics path is still ahead.
-- `uv.lock` was regenerated to add the `sim2sim` optional extra.
 - The new MDP terms are a separate module (`tasks/velocity/mdp/gait.py`), so upstream term
   files are untouched. Two upstream files are edited: a one-line import in
   `tasks/velocity/mdp/__init__.py` and the 9-line robot export in
