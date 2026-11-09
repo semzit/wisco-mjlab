@@ -186,21 +186,19 @@ conceptual and the code is only there for backup.
 - Flat also strips the terrain scan, `height_scan` and the out-of-bounds termination.
 - Play mode: infinite episodes, no corruption, no pushes, small terrain grid.
 
-### 17. Sensors and observations
+### 17. Sensors and observations (scaffolded)
 
-- Feet-ground contact sensor; self-collision sensor with force history.
-- Foot-height scan wired to `left_foot` / `right_foot` sites via `ObjRef` +
-  `RingPatternCfg`.
-- Terrain scan frame pinned to the base body.
-- **Removed** `base_lin_vel` (no state estimator).
-- **Added** `gait_clock` to actor and critic.
+- Sensor wiring is commented in `env_cfgs.py`, with the G1 pattern as the template.
+- Slots for feet-ground contact, self-collision and foot-height scan.
+- `base_lin_vel` decision documented: delete it if the robot has no state estimator.
+- Optional `gait_clock`, off by default.
 
-### 18. Rewards
+### 18. Rewards (defaults for now)
 
-- Inherited mjlab weights for tracking, upright, pose and foot terms.
-- Pose standard deviations tuned per joint family.
-- Added self-collision and alternating-feet.
-- Conservative velocity ranges for a narrow-stance biped.
+- mjlab's default weights from the velocity task factory.
+- Pose tolerances and extra terms left as TODO blocks in `env_cfgs.py`.
+- Optional self-collision and alternating-feet rewards, commented out.
+- Velocity ranges left at the factory defaults until the robot exists.
 
 ### 19. New MDP terms (where they live)
 
@@ -208,8 +206,8 @@ conceptual and the code is only there for backup.
   exported through the task's `mdp` package.
 - **Why a separate module:** Asimov patched `observations.py` and `rewards.py` directly;
   one file of our own keeps the upstream term files untouched and the diff readable.
-- Generalized: foot count from the sensor, phase reset via the manager hook, CSV columns
-  configurable.
+- Generalized: foot count from the sensor and phase reset via the manager hook.
+- Neither term is enabled by default; a robot config has to wire it in.
 
 ### 20. Tooling and docs
 
@@ -241,7 +239,7 @@ conceptual and the code is only there for backup.
 | Entity + actuators | New robot package, joint families, gains, action scale |
 | Sensors | Feet contact, self-collision, foot-height scan, terrain frame |
 | Observations | Removed `base_lin_vel`, added `gait_clock` |
-| Rewards | Pose stds, self-collision, alternating feet |
+| Rewards | Pose stds and extra terms are TODO blocks |
 | Environment config / tasks | Three task IDs, rough / flat / balance |
 
 ---
@@ -280,8 +278,8 @@ conceptual and the code is only there for backup.
 14. New robot package
 15. Actuator and gain setup
 16. Task configuration
-17. Sensors and observations
-18. Rewards
+17. Sensors and observations (scaffolded)
+18. Rewards (defaults for now)
 19. New MDP terms (where they live)
 20. Tooling and docs
 21. Validation status (honest slide)

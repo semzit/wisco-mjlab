@@ -43,11 +43,7 @@ WISCO_HUMANOID_XML: Path = (
 
 
 def get_spec() -> mujoco.MjSpec:
-  """Load the robot MJCF.
-
-  The existence check is lazy on purpose: it runs when the model is first built, not at
-  import time, so the task registry and ``list-envs`` work before the model exists.
-  """
+  """Load the robot MJCF."""
   if not WISCO_HUMANOID_XML.exists():
     raise FileNotFoundError(
       f"Robot MJCF not found at {WISCO_HUMANOID_XML}.\n"
@@ -60,14 +56,6 @@ def get_spec() -> mujoco.MjSpec:
 
 ##
 # Actuators.
-#
-# One BuiltinPositionActuatorCfg per joint family (hip pitch, hip roll, hip yaw, knee,
-# ankle pitch/roll). Values come from the motor datasheets:
-#
-#   armature     = J_rotor * gear_ratio^2          reflected inertia at the joint
-#   stiffness    = armature * (2*pi*10)^2          10 Hz bandwidth
-#   damping      = 2 * zeta * armature * omega     capped at the motor's maximum
-#   effort_limit = peak torque
 #
 # TODO(wisco-humanoid): define the groups once the motors are chosen. Shape:
 #

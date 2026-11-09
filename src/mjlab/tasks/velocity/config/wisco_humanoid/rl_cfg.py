@@ -1,4 +1,8 @@
-"""RL configuration for the Wisco Humanoid velocity task."""
+"""RL configuration for the Wisco Humanoid velocity task.
+
+Same PPO setup as Unitree G1; only the experiment name differs. No robot-specific
+tuning lives here.
+"""
 
 from mjlab.rl import (
   RslRlModelCfg,
@@ -8,14 +12,10 @@ from mjlab.rl import (
 
 
 def wisco_humanoid_ppo_runner_cfg() -> RslRlOnPolicyRunnerCfg:
-  """Create the RL runner configuration for the Wisco Humanoid velocity task.
-
-  The network is smaller than the Unitree G1 default, matching a humanoid with a modest
-  observation and action space. Resize it if the robot has many more degrees of freedom.
-  """
+  """Create the RL runner configuration for the Wisco Humanoid velocity task."""
   return RslRlOnPolicyRunnerCfg(
     actor=RslRlModelCfg(
-      hidden_dims=(256, 256, 128),
+      hidden_dims=(512, 256, 128),
       activation="elu",
       obs_normalization=True,
       distribution_cfg={
@@ -25,7 +25,7 @@ def wisco_humanoid_ppo_runner_cfg() -> RslRlOnPolicyRunnerCfg:
       },
     ),
     critic=RslRlModelCfg(
-      hidden_dims=(256, 256, 128),
+      hidden_dims=(512, 256, 128),
       activation="elu",
       obs_normalization=True,
     ),

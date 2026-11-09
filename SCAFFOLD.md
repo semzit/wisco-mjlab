@@ -116,8 +116,10 @@ train ──► play ──► ONNX export (gains + defaults + observation layou
 
 - Every armature, stiffness, damping, effort limit and standing height.
 - The MJCF, meshes and reference trajectory.
-- Velocity ranges, pose standard deviations and reward weights — carried over from
-  Asimov and G1, not measured on this robot.
+- Velocity ranges, pose standard deviations and reward weights — left at mjlab's
+  defaults until the robot exists.
+- Every robot-specific value in `env_cfgs.py` (names, sensors, commands, rewards,
+  events) — the file is a commented skeleton.
 
 The package `README.md` lists exactly what to replace, in order. Start there once the
 robot model exists.

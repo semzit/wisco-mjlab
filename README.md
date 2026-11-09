@@ -53,25 +53,26 @@ Key characteristics (TBD, to be measured on the real machine):
 | Reward | Description |
 |--------|-------------|
 | **Velocity tracking** | Track the commanded `(vx, vy, ωz)` |
-| **Alternating feet** | Enforce a bipedal gait pattern |
+| **Alternating feet** | Optional, not in upstream mjlab; wiring commented in `env_cfgs.py` |
 | **Pose** | Speed-dependent joint posture (tighter when standing, looser when running) |
 | **Air time** | Encourage dynamic stepping |
 | **Foot clearance / swing height** | Lift the foot over terrain and land cleanly |
 | **Foot slip** | Penalize sliding while in contact |
 | **Soft landing** | Penalize hard impacts |
-| **Self-collision** | Penalize inter-link contact |
+| **Self-collision** | Optional; wiring commented in `env_cfgs.py` |
 | **Upright, body ang. vel, angular momentum** | Keep the trunk stable |
 | **Joint limits, action rate** | Stay inside the actuators' envelope |
 
 Weights live in
-[`env_cfgs.py`](src/mjlab/tasks/velocity/config/wisco_humanoid/env_cfgs.py) and inherit
-mjlab's defaults where the robot does not need an override.
+[`env_cfgs.py`](src/mjlab/tasks/velocity/config/wisco_humanoid/env_cfgs.py). The file is a
+skeleton: it inherits mjlab's defaults and leaves the robot-specific overrides as TODO
+comments.
 
 ### Configuration
 
 - PPO with adaptive learning rate, 30k iterations
 - Terrain curriculum on the rough task
-- Network: `(256, 256, 128)` — deliberately small for a 12-DOF robot
+- Network: `(512, 256, 128)`, identical to the Unitree G1 config
 
 ### Tasks
 
@@ -94,10 +95,10 @@ mjlab's defaults where the robot does not need an override.
 | `actions` | Action history |
 | `command` | `(vx, vy, ωz)` |
 | `height_scan` | Terrain raycast (rough task only) |
-| `gait_clock` | `[cos(φ), sin(φ)]` at the configured gait frequency |
+| `gait_clock` | Optional phase clock, commented out by default |
 
-**Removed:** `base_lin_vel` — a real robot needs a state estimator to observe it. Delete
-the two `del` lines in `env_cfgs.py` if the robot carries one.
+**`base_lin_vel`:** the factory includes it. A robot without a state estimator should
+delete it — the two `del` lines are waiting, commented out, in `env_cfgs.py`.
 
 The critic additionally sees foot height, air time, contact state and contact forces.
 
