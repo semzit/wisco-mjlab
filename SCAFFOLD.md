@@ -69,7 +69,7 @@ What changed relative to Asimov:
 | `asimov` package and task IDs | `wisco_humanoid` package, `Mjlab-*-Wisco-Humanoid` task IDs |
 | Old mjlab API | Current API (translated, not redesigned) |
 | Real MJCF, meshes, motor docs, walking CSV | Empty `xmls/` and `xmls/assets/` stubs |
-| Hardware numbers inline | All collected in `wisco_humanoid_constants.py`, marked `TODO` |
+| Hardware numbers inline | Emptied into a commented `wisco_humanoid_constants.py` skeleton |
 | `deploy.py` with a 47-dim obs built by hand | Not ported yet; deployment tooling is future work |
 | `gait_clock` / alternating feet hardcoded to 12 joints, 2 feet | Foot count derived from the contact sensor |
 | New MDP terms appended to `observations.py` / `rewards.py` | Added as their own module, `tasks/velocity/mdp/gait.py`, so upstream terms stay untouched |
@@ -82,7 +82,7 @@ is intentional — it keeps the structure honest until real data exists.
 
 ```
 src/mjlab/asset_zoo/robots/wisco_humanoid/
-  wisco_humanoid_constants.py   # the only file with hardware numbers
+  wisco_humanoid_constants.py   # skeleton: spec, actuators, init state, collisions, action scale
   __init__.py                   # exports
   xmls/.gitkeep                 # put wisco_humanoid.xml here
   xmls/assets/.gitkeep          # put STL/OBJ files here (meshdir="assets")

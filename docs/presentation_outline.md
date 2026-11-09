@@ -169,16 +169,16 @@ conceptual and the code is only there for backup.
 ### 14. New robot package
 
 - `src/mjlab/asset_zoo/robots/wisco_humanoid/`.
-- `wisco_humanoid_constants.py` is the single place hardware numbers live.
+- `wisco_humanoid_constants.py` is the skeleton where hardware values will live.
 - Empty `xmls/` and `xmls/assets/` stubs.
 - Lazy `get_spec()` so tasks register before the model exists.
 
-### 15. Actuator and gain setup
+### 15. Actuator scaffolding
 
-- Five joint families: hip pitch / roll / yaw, knee, ankle.
-- Reflected inertia, physics-based KP, hardware-capped KD.
-- Action scale derived from effort/stiffness.
-- All values marked `TODO(wisco-humanoid)`.
+- Five joint-family slots: hip pitch / roll / yaw, knee, ankle.
+- Each slot needs armature, stiffness, damping, effort limit and an action scale.
+- Formulas (reflected inertia, 10 Hz KP, capped KD) are documented in comments.
+- All values still `TODO(wisco-humanoid)`.
 
 ### 16. Task configuration
 

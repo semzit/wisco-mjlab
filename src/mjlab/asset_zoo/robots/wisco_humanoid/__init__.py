@@ -1,8 +1,6 @@
 """Wisco Humanoid robot configuration."""
 
 from mjlab.asset_zoo.robots.wisco_humanoid.wisco_humanoid_constants import (
-  FEET_ONLY_COLLISION,
-  FULL_COLLISION,
   HOME_KEYFRAME,
   WISCO_HUMANOID_ACTION_SCALE,
   WISCO_HUMANOID_ARTICULATION,
@@ -12,8 +10,6 @@ from mjlab.asset_zoo.robots.wisco_humanoid.wisco_humanoid_constants import (
 )
 
 __all__ = [
-  "FEET_ONLY_COLLISION",
-  "FULL_COLLISION",
   "HOME_KEYFRAME",
   "WISCO_HUMANOID_ACTION_SCALE",
   "WISCO_HUMANOID_ARTICULATION",

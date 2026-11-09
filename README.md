@@ -13,10 +13,10 @@ original deployment tooling.
   <img src="docs/static/wiscohumanoids_logo.jpg" alt="Wisco Humanoids" height="180"/>
 </p>
 
-> ⚠️ **Scaffold, not a working robot yet.** The task structure, gains and tooling are in
-> place, but `xmls/wisco_humanoid.xml` and the meshes do not exist. Every hardware number
-> is a placeholder marked `TODO(wisco-humanoid)`. See [SCAFFOLD.md](SCAFFOLD.md) for what
-> changed and what is still fake.
+> ⚠️ **Scaffold, not a working robot yet.** The task structure and tooling are in place,
+> but `xmls/wisco_humanoid.xml` and the meshes do not exist, and the constants file is a
+> skeleton with `TODO(wisco-humanoid)` slots for actuators, collision policy and action
+> scale. See [SCAFFOLD.md](SCAFFOLD.md) for what changed and what is still fake.
 
 ---
 

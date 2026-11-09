@@ -1,12 +1,14 @@
 # Wisco Humanoid robot configuration
 
-Scaffold package for a bipedal humanoid whose model is not defined yet. The structure
-mirrors the Asimov reference configuration: joint families, physics-based PD gains,
-keyframes, collision policy and the action scale all live in
-`wisco_humanoid_constants.py`.
+Scaffold package for a bipedal humanoid whose model is not defined yet.
 
-Nothing here is hardware-specific yet. Every numeric value is an Asimov placeholder and
-is marked `TODO(wisco-humanoid)`.
+`wisco_humanoid_constants.py` is intentionally almost empty: it holds the spec loader and
+an entity config, with commented slots for the actuator groups, initial state, collision
+policy and action scale. Fill those in as the hardware data arrives; nothing in it is
+Wisco-specific yet.
+
+The MJCF comes from the mechanical team, so this package does not define the robot's
+geometry.
 
 ## What you need to add
 
