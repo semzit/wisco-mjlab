@@ -180,27 +180,24 @@ conceptual and the code is only there for backup.
 - Formulas (reflected inertia, 10 Hz KP, capped KD) are documented in comments.
 - All values still `TODO(wisco-humanoid)`.
 
-### 16. Task configuration
+### 16. Editing the velocity environment
 
-- Three tasks: Rough (curriculum), Flat (plane), Balance (no velocity command).
-- Flat also strips the terrain scan, `height_scan` and the out-of-bounds termination.
-- Play mode: infinite episodes, no corruption, no pushes, small terrain grid.
+- **Start from the factory.** `make_velocity_env_cfg()` already defines observations,
+  actions, rewards, commands, events, terminations and curriculum. We do not rebuild it,
+  we override it.
+- **Swap the robot.** Point `cfg.scene.entities` at `get_wisco_humanoid_robot_cfg()` and
+  set the action scale.
+- **Point the sensors at our names.** Feet-ground contact, self-collision, foot-height
+  scan on the foot sites, terrain scan on the base body.
+- **Trim what we cannot measure.** Delete `base_lin_vel` if there is no state estimator;
+  the gait clock is optional.
+- **Set the command envelope.** Velocity ranges the robot can physically reach.
+- **Tune the score, not the structure.** Pose tolerances, body names and a few weights;
+  self-collision and alternating feet are optional extras.
+- **Same file, three tasks.** Rough adds the terrain curriculum, flat switches to a plane
+  and drops the height scan, balance zeroes the commands and tracking weights.
 
-### 17. Sensors and observations (scaffolded)
-
-- Sensor wiring is commented in `env_cfgs.py`, with the G1 pattern as the template.
-- Slots for feet-ground contact, self-collision and foot-height scan.
-- `base_lin_vel` decision documented: delete it if the robot has no state estimator.
-- Optional `gait_clock`, off by default.
-
-### 18. Rewards (defaults for now)
-
-- mjlab's default weights from the velocity task factory.
-- Pose tolerances and extra terms left as TODO blocks in `env_cfgs.py`.
-- Optional self-collision and alternating-feet rewards, commented out.
-- Velocity ranges left at the factory defaults until the robot exists.
-
-### 19. New MDP terms (where they live)
+### 17. New MDP terms (where they live)
 
 - `tasks/velocity/mdp/gait.py`: `gait_clock` and `alternating_feet_contact`,
   exported through the task's `mdp` package.
@@ -209,20 +206,20 @@ conceptual and the code is only there for backup.
 - Generalized: foot count from the sensor and phase reset via the manager hook.
 - Neither term is enabled by default; a robot config has to wire it in.
 
-### 20. Tooling and docs
+### 18. Tooling and docs
 
 - Nine-line robot export in `asset_zoo/robots/__init__.py` — the only upstream source edit.
 - README rewritten in the Asimov style with logo; `SCAFFOLD.md` orientation doc.
 - Changelog entry and credits (mjlab, Menlo Research, WiscoHumanoids).
 
-### 21. Validation status (honest slide)
+### 19. Validation status (honest slide)
 
 - `uv run list-envs` → all three tasks.
 - 18 config tests pass; full fast suite 1122 passed, 13 skipped.
 - `ruff` and `ty` clean; the package imports without the model.
 - **Not tested:** any rollout, because the MJCF does not exist yet.
 
-### 22. What is still placeholder / next steps
+### 20. What is still placeholder / next steps
 
 - Add `xmls/wisco_humanoid.xml` and the meshes.
 - Fill rotor inertia, gear ratio, torque and standing height.
@@ -250,7 +247,7 @@ conceptual and the code is only there for backup.
 | --- | --- | --- |
 | MJLab / Taxonomy | 1–12 | ~9 min |
 | Bridge | — | ~1 min |
-| Wisco-Mjlab / Changes | 13–22 | ~6 min |
+| Wisco-Mjlab / Changes | 13–20 | ~6 min |
 | Questions | — | rest |
 
 ---
@@ -276,14 +273,12 @@ conceptual and the code is only there for backup.
 
 13. Repository setup
 14. New robot package
-15. Actuator and gain setup
-16. Task configuration
-17. Sensors and observations (scaffolded)
-18. Rewards (defaults for now)
-19. New MDP terms (where they live)
-20. Tooling and docs
-21. Validation status (honest slide)
-22. What is still placeholder / next steps
+15. Actuator scaffolding
+16. Editing the velocity environment
+17. New MDP terms (where they live)
+18. Tooling and docs
+19. Validation status (honest slide)
+20. What is still placeholder / next steps
 
 **Interstitial**
 
